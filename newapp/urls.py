@@ -3,9 +3,8 @@ from . import views
 
 urlpatterns = [
     
-    path('posts/<int:pk>/',views.getPosts),
-    path('posts',views.getPosts),
-    path('post-create',views.postCreate),
-    path('post-updata/<int:pk>',views.postUpdata),
-    path('post-delete/<int:pk>',views.postDelete),
+    path('post/<int:pk>',views.retrievePosts.as_view()),
+    path('posts',views.listCreatePost.as_view()),
+    path('<int:pk>/update',views.updatePost.as_view()),
+    path('<int:pk>/delete',views.deletePost.as_view()),
 ]

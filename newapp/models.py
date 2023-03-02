@@ -5,5 +5,5 @@ from django.db import models
 class Posts(models.Model):
     author = models.CharField(max_length=100)
     title = models.CharField(max_length=100)
-    content = models.TextField()
+    content = models.TextField(null=True)
     

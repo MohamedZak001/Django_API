@@ -1,39 +1,37 @@
 from django.shortcuts import render
 from rest_framework.response import Response
-from rest_framework.decorators import api_view
+from rest_framework import generics
 from .serializars import SerPosts
 from .models import Posts
 
-# Create your views here.
-@api_view(['GET'])
-def getPosts(request,pk = None):
-    if pk:
-        obj = Posts.objects.get(id = pk)
-        ser = SerPosts(obj,many = False)
-        return Response(ser.data)
-    objs = Posts.objects.all()
-    ser = SerPosts(objs, many = True)
-    print(ser.data)
-    return Response(ser.data)
+# Class based viwe
+class retrievePosts(generics.RetrieveAPIView):
+    queryset = Posts.objects.all()
+    serializer_class = SerPosts 
 
-@api_view(['POST'])
-def postCreate(requset):
-    ser = SerPosts(data = requset.data)
-    if ser.is_valid():
-        ser.save()
-    return Response(ser.data)
+class listCreatePost(generics.ListCreateAPIView):
+    queryset = Posts.objects.all()
+    serializer_class = SerPosts
 
-@api_view(['POST'])
-def postUpdata(request,pk):
-    obj = Posts.objects.get(id = pk)
-    ser = SerPosts(instance=obj,data = request.data)
-    if ser.is_valid():
-        ser.save()
-    return Response(ser.data)
+    def perform_create(self, serializer):
+        content = serializer.validated_data.get("content") or None
+        if content is None:
+            content = serializer.validated_data.get("title")
+        serializer.save(content = content)
+        
+class updatePost(generics.UpdateAPIView):
+    queryset = Posts.objects.all()
+    serializer_class = SerPosts
+    lookup_field = 'pk'
+
+    def perform_update(self, serializer):
+        instance = serializer.save()
+        if not instance.content:
+            instance.content = instance.title
+
+class deletePost(generics.DestroyAPIView):
+    queryset = Posts.objects.all()
+    serializer_class = SerPosts
+    lookup_field = 'pk'
 
 
-@api_view(['DELETE'])
-def postDelete(request,pk):
-    obj = Posts.objects.get(id=pk)
-    obj.delete()
-    return Response("item has Deleted")
